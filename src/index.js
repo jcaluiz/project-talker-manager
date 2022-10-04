@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs/promises');
 const path = require('path');
+const cryptoJS = require('crypto-js');
+// const ensureAuthenticated = require('./middleware/ensureAuthenticated');
 
 const app = express();
 app.use(bodyParser.json());
@@ -36,4 +38,11 @@ app.get('/talker/:id', async (req, res) => {
     res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   }
   res.status(200).json(idTalker);
-}); 
+});
+
+app.post('/login', async (req, res) => {
+  // usei a documentação do CryptoJS e regex tenho praticado no
+  // regexone e regex101. Doc: https://cryptojs.gitbook.io/docs/
+    res.status(200).json({ token: cryptoJS.AES.encrypt('Message', 'Secret Passphrase').key
+    .toString(cryptoJS.enc.Hex).match(/\w{16}/)[0] });
+});

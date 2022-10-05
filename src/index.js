@@ -4,6 +4,7 @@ const fs = require('fs/promises');
 const path = require('path');
 const cryptoJS = require('crypto-js');
 const loginValidation = require('./middleware/loginValidation');
+const ensureAuthenticated = require('./middleware/ensureAuthenticated');
 // const ensureAuthenticated = require('./middleware/ensureAuthenticated');
 
 const app = express();
@@ -46,4 +47,21 @@ app.post('/login', loginValidation, async (req, res) => {
   // regexone e regex101. Doc: https://cryptojs.gitbook.io/docs/
     res.status(200).json({ token: cryptoJS.AES.encrypt('Message', 'Secret Passphrase').key
     .toString(cryptoJS.enc.Hex).match(/\w{16}/)[0] });
+});
+
+app.post('/talker', ensureAuthenticated, async (req, res) => {
+  const talker = { ...req.body };
+  const talkers = JSON.parse(await fs.readFile(pathTalkers));
+  const newTalker = { 
+    name: talker.name,
+    age: talker.age,
+    id: talkers[talkers.length - 1].id + 1 || 1,
+    talk: {
+      watchedAt: talker.talk.watchedAt,
+      rate: talker.talk.rate,
+    },
+  };
+  talkers.push(newTalker);
+  await fs.writeFile(pathTalkers, JSON.stringify(talkers));
+  res.status(201).json(newTalker);
 });

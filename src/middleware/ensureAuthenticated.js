@@ -23,7 +23,8 @@ const nameSizeFunction = (body) => body.name && body.name.length < 3;
 
 const invalidTokenFunction = (token) => token && (token.length < 16 || token.length > 16);
 
-const requiredRateFieldFunction = (body) => body.talk && !body.talk.rate;
+const requiredRateFieldFunction = (body) => (body.talk && body.talk.rate !== 0) 
+  && !body.talk.rate;
 
 const requiredWatchedAtFieldFunction = (body) => body.talk && !body.talk.watchedAt;
 

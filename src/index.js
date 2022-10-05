@@ -5,6 +5,7 @@ const path = require('path');
 const cryptoJS = require('crypto-js');
 const loginValidation = require('./middleware/loginValidation');
 const ensureAuthenticated = require('./middleware/ensureAuthenticated');
+const deleteAuthenticated = require('./middleware/deleteAuthenticated');
 // const ensureAuthenticated = require('./middleware/ensureAuthenticated');
 
 const app = express();
@@ -83,4 +84,13 @@ app.put('/talker/:id', ensureAuthenticated, async (req, res) => {
   talkers[index] = newTalker;
   await fs.writeFile(pathTalkers, JSON.stringify(talkers));
   res.status(200).json(newTalker);
+});
+
+app.delete('/talker/:id', deleteAuthenticated, async (req, res) => {
+  const { id } = req.params;
+  const talkers = JSON.parse(await fs.readFile(pathTalkers));
+  const index = talkers.findIndex((talk) => talk.id === +(id));
+  const newTalker = talkers.filter((_talk, i) => index !== i);
+  await fs.writeFile(pathTalkers, JSON.stringify(newTalker));
+  res.status(204).end();
 });

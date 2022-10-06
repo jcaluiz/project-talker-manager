@@ -6,6 +6,7 @@ const cryptoJS = require('crypto-js');
 const loginValidation = require('./middleware/loginValidation');
 const ensureAuthenticated = require('./middleware/ensureAuthenticated');
 const deleteAuthenticated = require('./middleware/deleteAuthenticated');
+const talkerFound = require('./middleware/talkerFound');
 // const ensureAuthenticated = require('./middleware/ensureAuthenticated');
 
 const app = express();
@@ -32,14 +33,18 @@ app.get('/talker', async (_req, res) => {
   res.status(200).json(talkers);
 });
 
-app.get('/talker/:id', async (req, res) => {
+app.get('/talker/search', deleteAuthenticated, async (req, res) => {
+  const { q } = req.query;
+  const talkers = JSON.parse(await fs.readFile(pathTalkers));
+  const qTalker = talkers.filter((item) => item.name.includes(q));
+  res.status(200).json(qTalker);
+});
+
+app.get('/talker/:id', talkerFound, async (req, res) => {
   const { params } = req;
   const idParams = params.id;
   const talkers = JSON.parse(await fs.readFile(pathTalkers));
   const idTalker = talkers.find((item) => item.id === +(idParams));
-  if (!idTalker) {
-    res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
-  }
   res.status(200).json(idTalker);
 });
 
